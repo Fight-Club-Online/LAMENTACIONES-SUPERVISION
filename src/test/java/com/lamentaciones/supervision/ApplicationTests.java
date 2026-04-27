@@ -1,4 +1,4 @@
-package LAMENTACIONES_SUPERVISION.com.lamentaciones.supervision;
+package com.lamentaciones.supervision;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

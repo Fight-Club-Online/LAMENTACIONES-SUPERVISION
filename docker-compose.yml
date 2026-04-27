@@ -1,0 +1,43 @@
+services:
+  # Microservicio de Supervisión
+  supervision-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: supervision-app
+    ports:
+      - "8085:8085"
+    environment:
+      # Variables que sobreescriben el application.properties
+      - SPRING_DATA_MONGODB_URI=mongodb+srv://pacoandres03_db_user:admin@blueteam.biz5ysx.mongodb.net/VOICE-CHAT?retryWrites=true&w=majority
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - JWT_SECRET=ARSW_SECRET_OSCAR_JUAN_SANTIAGO_GAME
+      - JWT_EXPIRATION=3600000
+      - FRONTEND_ORIGINS=https://lamentaciones-frontend.vercel.app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - lamentaciones-network
+
+  # RabbitMQ con interfaz de gestión
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq-broker
+    ports:
+      - "5672:5672"   # Puerto de mensajería
+      - "15672:15672" # Interfaz web (guest/guest)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lamentaciones-network
+
+networks:
+  lamentaciones-network:
+    driver: bridge

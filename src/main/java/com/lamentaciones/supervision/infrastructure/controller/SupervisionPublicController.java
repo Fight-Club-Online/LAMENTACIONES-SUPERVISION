@@ -41,7 +41,8 @@ public class SupervisionPublicController {
         return ResponseEntity.ok(getChatHistoryUseCase.getChatHistory(fightId, limit));
     }
 
-    // Obtener notificaciones de acciones de supervisión (baneos, advertencias, etc.)
+    // Obtener notificaciones de acciones de supervisión (baneos, advertencias,
+    // etc.)
     @GetMapping("/notifications/{userId}")
     public ResponseEntity<List<SupervisionNotification>> getNotifications(
             @PathVariable String userId) {
@@ -54,4 +55,18 @@ public class SupervisionPublicController {
         getNotificationsUseCase.markAsRead(userId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/notifications/{userId}/unread")
+    public ResponseEntity<List<SupervisionNotification>> getUnreadNotifications(
+            @PathVariable String userId) {
+        return ResponseEntity.ok(getNotificationsUseCase.getUnreadNotifications(userId));
+    }
+
+    // NUEVO: Consulta del historial completo de notificaciones
+    @GetMapping("/notifications/{userId}/history")
+    public ResponseEntity<List<SupervisionNotification>> getNotificationHistory(
+            @PathVariable String userId) {
+        return ResponseEntity.ok(getNotificationsUseCase.getAllNotifications(userId));
+    }
+
 }

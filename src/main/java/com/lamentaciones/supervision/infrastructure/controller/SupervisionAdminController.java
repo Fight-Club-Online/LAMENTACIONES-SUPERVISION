@@ -21,12 +21,14 @@ import com.lamentaciones.supervision.application.dto.UserStatusResponse;
 import com.lamentaciones.supervision.application.ports.in.BanUserUseCase;
 import com.lamentaciones.supervision.application.ports.in.CheckUserStatusUseCase;
 import com.lamentaciones.supervision.application.ports.in.GetChatHistoryUseCase;
+import com.lamentaciones.supervision.application.ports.in.GetUserNotificationsUseCase;
 import com.lamentaciones.supervision.application.ports.in.LiftBanUseCase;
 import com.lamentaciones.supervision.application.ports.in.ReviewReportUseCase;
 import com.lamentaciones.supervision.application.ports.in.SuspendUserUseCase;
 import com.lamentaciones.supervision.domain.enums.BanReason;
 import com.lamentaciones.supervision.domain.model.ChatMessage;
 import com.lamentaciones.supervision.domain.model.Report;
+import com.lamentaciones.supervision.domain.model.SupervisionNotification;
 import com.lamentaciones.supervision.domain.model.UserBan;
 import com.lamentaciones.supervision.infrastructure.controller.requests.BanUserRequest;
 import com.lamentaciones.supervision.infrastructure.controller.requests.ReviewReportRequest;
@@ -45,6 +47,7 @@ public class SupervisionAdminController {
     private final ReviewReportUseCase reviewReportUseCase;
     private final CheckUserStatusUseCase checkUserStatusUseCase;
     private final GetChatHistoryUseCase getChatHistoryUseCase;
+    private final GetUserNotificationsUseCase getNotificationsUseCase;
 
     // ── BAN / SUSPEND ─────────────────────────────────────────────
 
@@ -132,4 +135,11 @@ public class SupervisionAdminController {
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(getChatHistoryUseCase.getFlaggedMessages(page, size));
     }
+
+    @GetMapping("/notifications/{userId}/history")
+    public ResponseEntity<List<SupervisionNotification>> getNotificationHistory(
+            @PathVariable String userId) {
+        return ResponseEntity.ok(getNotificationsUseCase.getAllNotifications(userId));
+    }
+
 }

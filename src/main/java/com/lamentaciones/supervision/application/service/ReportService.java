@@ -23,13 +23,43 @@ public class ReportService implements ReviewReportUseCase { // Eliminamos Submit
     @Override
     public Report reviewReport(ReviewReportCommand command) {
         Report report = reportRepository.findById(command.getReportId())
-            .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
 
-        report.setReportStatus(command.getAction()); // RESOLVED, DISMISSED
+        // VALIDACIÓN DE NULOS: Si el estado viene vacío de la DB, lo tratamos como
+        // PENDING
+        ReportStatus currentStatus = (report.getReportStatus() == null)
+                ? ReportStatus.PENDING
+                : report.getReportStatus();
+
+        ReportStatus nextStatus = command.getAction();
+
+        // --- MÁQUINA DE ESTADOS REFORZADA ---
+
+        // 1. Si el reporte es nuevo (null) o PENDING, solo puede pasar a REVIEWED
+        if (nextStatus == ReportStatus.REVIEWED && currentStatus != ReportStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Solo se puede revisar (REVIEWED) un reporte pendiente. Estado actual: " + currentStatus);
+        }
+
+        // 2. Si se intenta RESOLVER o DESCARTAR, debe estar obligatoriamente en
+        // REVIEWED
+        if ((nextStatus == ReportStatus.RESOLVED || nextStatus == ReportStatus.DISMISSED)
+                && currentStatus != ReportStatus.REVIEWED) {
+            throw new IllegalStateException(
+                    "Para finalizar el caso, primero debe marcarlo como REVIEWED. Estado actual: " + currentStatus);
+        }
+
+        // 3. Bloqueo de cambios en reportes ya finalizados
+        if (currentStatus == ReportStatus.RESOLVED || currentStatus == ReportStatus.DISMISSED) {
+            throw new IllegalStateException("Este reporte ya está cerrado y no permite más cambios.");
+        }
+
+        // --- APLICAR CAMBIOS ---
+        report.setReportStatus(nextStatus);
         report.setAdminNotes(command.getNotes());
         report.setResolvedAt(Instant.now());
 
-        log.info("[REPORT] Reporte {} revisado con acción: {}", command.getReportId(), command.getAction());
+        log.info("[REPORT] Transición exitosa: {} -> {} (ID: {})", currentStatus, nextStatus, report.getId());
         return reportRepository.save(report);
     }
 

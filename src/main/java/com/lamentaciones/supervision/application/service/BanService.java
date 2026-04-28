@@ -26,6 +26,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
 
     private final UserBanRepository banRepository;
     private final SupervisionEventPublisher eventPublisher;
+    private final NotificationService notificationService;
 
     @Override
     public UserBan banUser(BanUserCommand command) {
@@ -49,6 +50,10 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                 .build();
 
         UserBan saved = banRepository.save(ban);
+        notificationService.sendNotification(
+                command.getUserId(),
+                "BANNED",
+                "Tu cuenta ha sido bloqueada permanentemente. Motivo: " + command.getReason());
 
         // Publicar evento para que el módulo de auth bloquee el acceso
         eventPublisher.publishUserBanned(UserBannedEvent.builder()
@@ -80,6 +85,11 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                 .build();
 
         UserBan saved = banRepository.save(suspension);
+        notificationService.sendNotification(
+                command.getUserId(),
+                "SUSPENDED",
+                "Tu cuenta ha sido suspendida temporalmente hasta el " + command.getExpiresAt() + ". Motivo: "
+                        + command.getReason());
 
         eventPublisher.publishUserSuspended(UserSuspendedEvent.builder()
                 .userId(command.getUserId())
@@ -99,6 +109,10 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
 
         // 2. Borramos físicamente de MongoDB
         banRepository.deleteByUserId(userId);
+        notificationService.sendNotification(
+                userId,
+                "BAN_LIFTED",
+                "Tu cuenta ha sido habilitada nuevamente por un administrador.");
 
         // 3. Notificamos
         eventPublisher.publishBanLifted(BanLiftedEvent.builder()

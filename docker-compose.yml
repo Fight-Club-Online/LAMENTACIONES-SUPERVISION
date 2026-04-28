@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: supervision-app
     ports:
-      - "${PORT:-8085}:8085"
+      - "8085:8085"
     environment:
       - SPRING_DATA_MONGODB_URI=${MONGO_URI}
       - RABBITMQ_HOST=${RABBITMQ_HOST}

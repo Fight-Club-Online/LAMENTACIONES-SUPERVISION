@@ -50,6 +50,14 @@ public class MongoReportAdapter implements ReportRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Report> findAll(int page, int size) {
+        return mongoRepo.findAll(PageRequest.of(page, size))
+                .stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
     private ReportDocument toDocument(Report domain) {
         if (domain == null)
             return null;

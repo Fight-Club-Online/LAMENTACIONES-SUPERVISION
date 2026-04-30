@@ -72,4 +72,13 @@ public class ReportService implements ReviewReportUseCase { // Eliminamos Submit
     public List<Report> getReportsByUser(String userId) {
         return reportRepository.findByReportedUserId(userId);
     }
+
+    @Override
+    public List<Report> getAllReports(String status, int page, int size) {
+        if (status != null && !status.isEmpty()) {
+            return reportRepository.findByStatus(ReportStatus.valueOf(status.toUpperCase()), page, size);
+        }
+        // Si no hay status, necesitamos un método de "findAll" en el repositorio
+        return reportRepository.findAll(page, size);
+    }
 }

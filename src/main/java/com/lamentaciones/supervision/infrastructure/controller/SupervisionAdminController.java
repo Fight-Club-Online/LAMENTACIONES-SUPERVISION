@@ -95,6 +95,15 @@ public class SupervisionAdminController {
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(reviewReportUseCase.getPendingReports(page, size));
     }
+    // ── NUEVO ENDPOINT: HISTORIAL GLOBAL ──────────────────────────────
+
+    @GetMapping("/reports/history")
+    public ResponseEntity<List<Report>> getAllReportsHistory(
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(reviewReportUseCase.getAllReports(status, page, size));
+    }
 
     @GetMapping("/reports/user/{userId}")
     public ResponseEntity<List<Report>> getReportsByUser(@PathVariable String userId) {

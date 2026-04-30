@@ -30,4 +30,5 @@ public interface ReportRepository {
      * Obtiene todas las denuncias que se han hecho contra un usuario específico para historial.
      */
     List<Report> findByReportedUserId(String userId);
+    List<Report> findAll(int page, int size);
 }

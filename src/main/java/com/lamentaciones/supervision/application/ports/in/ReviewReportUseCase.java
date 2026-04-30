@@ -9,4 +9,5 @@ public interface ReviewReportUseCase {
     Report reviewReport(ReviewReportCommand command);
     List<Report> getPendingReports(int page, int size);
     List<Report> getReportsByUser(String userId);
+    List<Report> getAllReports(String status, int page, int size);
 }

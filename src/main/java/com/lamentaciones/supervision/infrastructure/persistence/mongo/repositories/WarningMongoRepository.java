@@ -17,4 +17,6 @@ public interface WarningMongoRepository extends MongoRepository<WarningDocument,
      * Permite filtrar las advertencias por un usuario específico para ver su reincidencia.
      */
     List<WarningDocument> findByUserIdOrderByTimestampDesc(String userId);
+
+    long countByUserId(String userId);
 }

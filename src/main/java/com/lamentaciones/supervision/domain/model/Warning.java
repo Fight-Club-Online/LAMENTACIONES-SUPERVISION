@@ -3,6 +3,8 @@ package com.lamentaciones.supervision.domain.model;
 import lombok.*;
 import java.time.Instant;
 
+import org.springframework.data.mongodb.core.index.Indexed;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -10,6 +12,7 @@ import java.time.Instant;
 public class Warning {
     private String id;
     private String fightId;
+    @Indexed
     private String userId;
     private String username;
     private String content;

@@ -87,6 +87,7 @@ public class MongoUserBanAdapter implements UserBanRepository {
                 .adminId(doc.getAdminId())
                 .createdAt(doc.getCreatedAt())
                 .expiresAt(doc.getExpiresAt())
+                .notified(doc.isNotified())
                 .warningCount(doc.getWarningCount())
                 .build();
     }

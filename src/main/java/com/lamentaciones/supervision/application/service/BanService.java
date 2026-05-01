@@ -19,6 +19,7 @@ import com.lamentaciones.supervision.domain.enums.SupervisionStatus;
 import com.lamentaciones.supervision.domain.model.UserBan;
 import com.lamentaciones.supervision.domain.model.Report;
 import com.lamentaciones.supervision.domain.repository.UserBanRepository;
+import com.lamentaciones.supervision.infrastructure.persistence.mongo.repositories.WarningMongoRepository;
 import com.lamentaciones.supervision.domain.repository.ReportRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
 
         private final UserBanRepository banRepository;
         private final ReportRepository reportRepository;
+        private final WarningMongoRepository warningRepo;
         private final SupervisionEventPublisher eventPublisher;
         private final NotificationService notificationService;
         private static final int MIN_REPORTS_REQUIRED = 3;
@@ -39,6 +41,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
         @Transactional
         public UserBan banUser(BanUserCommand command) {
                 validateReportCount(command.getUserId());
+                int totalWarnings = (int) warningRepo.countByUserId(command.getUserId());
                 banRepository.findActiveByUserId(command.getUserId()).ifPresent(existing -> {
                         if (existing.getStatus() == SupervisionStatus.BANNED) {
                                 log.warn("[BAN] El usuario {} ya tiene un baneo permanente.", command.getUserId());
@@ -60,6 +63,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                                 .createdAt(Instant.now())
                                 .expiresAt(null)
                                 .notified(true)
+                                .warningCount(totalWarnings)
                                 .build();
 
                 UserBan saved = banRepository.save(ban);
@@ -87,6 +91,8 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                                         "La suspensión requiere una fecha de expiración obligatoria.");
                 }
 
+                int totalWarnings = (int) warningRepo.countByUserId(command.getUserId());
+
                 validateReportCount(command.getUserId());
 
                 banRepository.findActiveByUserId(command.getUserId()).ifPresent(existing -> {
@@ -109,6 +115,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                                 .createdAt(Instant.now())
                                 .expiresAt(command.getExpiresAt())
                                 .notified(true)
+                                .warningCount(totalWarnings)
                                 .build();
 
                 UserBan saved = banRepository.save(suspension);

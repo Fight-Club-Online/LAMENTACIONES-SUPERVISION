@@ -71,7 +71,7 @@ public class SupervisionAdminController {
                 SuspendUserCommand.builder()
                         .userId(userId)
                         .adminId(request.getAdminId())
-                        .reason(request.getReason())
+                        .reason(BanReason.valueOf(request.getReason().toUpperCase()))
                         .description(request.getDescription())
                         .expiresAt(request.getExpiresAt())
                         .build()));

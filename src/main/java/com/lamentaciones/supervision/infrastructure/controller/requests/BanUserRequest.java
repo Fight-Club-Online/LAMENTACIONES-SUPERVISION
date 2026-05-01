@@ -5,7 +5,6 @@ import java.time.Instant;
 
 @Data
 public class BanUserRequest {
-    private String username;
     private String adminId;
     private String reason;
     private String description;

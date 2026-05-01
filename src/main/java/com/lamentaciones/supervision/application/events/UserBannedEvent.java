@@ -13,5 +13,5 @@ public class UserBannedEvent {
     private String userId;
     private SupervisionStatus status;
     private String reason;
-    private Instant expiresAt;  // null = permanente
+    private Instant expiresAt;
 }

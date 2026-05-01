@@ -11,7 +11,6 @@ public class SupervisionJwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // Simplemente dejamos pasar la petición hacia la seguridad básica
         filterChain.doFilter(request, response);
     }
 }

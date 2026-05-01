@@ -9,8 +9,8 @@ import java.time.Instant;
 @AllArgsConstructor
 @Getter @Setter // Añade estos dos para forzar la generación
 public class SuspendUserRequest {
-    private String username;
     private String adminId;
     private String reason;
+    private String description;
     private Instant expiresAt;
 }

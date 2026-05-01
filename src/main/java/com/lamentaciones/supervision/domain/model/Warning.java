@@ -12,7 +12,8 @@ public class Warning {
     private String fightId;
     private String userId;
     private String username;
-    private String content;   // El texto censurado "****"
-    private Integer count;    // ¡Importante! Para ver la reincidencia
+    private String content;
+    private Integer count;  
+    private String source;    
     private Instant timestamp;
 }

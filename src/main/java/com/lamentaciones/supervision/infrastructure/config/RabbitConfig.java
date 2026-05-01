@@ -10,17 +10,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
-
-    // Exchange de supervisión (publica)
     public static final String SUPERVISION_EXCHANGE = "supervision.events";
-
-    // Exchange de auth (escucha para saber si validar token)
     public static final String AUTH_EXCHANGE = "user.events";
-
-    // Queues que supervision consume
     public static final String CHAT_MESSAGES_QUEUE = "supervision.chat.messages";
-
-    // Queues que auth consume (supervision publica)
     public static final String USER_BANNED_AUTH_QUEUE = "auth.user.banned.queue";
     public static final String USER_SUSPENDED_AUTH_QUEUE = "auth.user.suspended.queue";
     public static final String BAN_LIFTED_AUTH_QUEUE = "auth.ban.lifted.queue";

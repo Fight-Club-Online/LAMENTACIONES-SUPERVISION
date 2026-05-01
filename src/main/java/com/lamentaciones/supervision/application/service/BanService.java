@@ -1,8 +1,10 @@
 package com.lamentaciones.supervision.application.service;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lamentaciones.supervision.application.commands.BanUserCommand;
 import com.lamentaciones.supervision.application.commands.SuspendUserCommand;
@@ -15,7 +17,10 @@ import com.lamentaciones.supervision.application.ports.in.LiftBanUseCase;
 import com.lamentaciones.supervision.application.ports.in.SuspendUserUseCase;
 import com.lamentaciones.supervision.domain.enums.SupervisionStatus;
 import com.lamentaciones.supervision.domain.model.UserBan;
+import com.lamentaciones.supervision.domain.model.Report;
 import com.lamentaciones.supervision.domain.repository.UserBanRepository;
+import com.lamentaciones.supervision.domain.repository.ReportRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,102 +29,146 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUseCase {
 
-    private final UserBanRepository banRepository;
-    private final SupervisionEventPublisher eventPublisher;
-    private final NotificationService notificationService;
+        private final UserBanRepository banRepository;
+        private final ReportRepository reportRepository;
+        private final SupervisionEventPublisher eventPublisher;
+        private final NotificationService notificationService;
+        private static final int MIN_REPORTS_REQUIRED = 3;
 
-    @Override
-    public UserBan banUser(BanUserCommand command) {
-        // Verificar si ya tiene ban activo
-        banRepository.findActiveByUserId(command.getUserId())
-                .ifPresent(existing -> {
-                    existing.setStatus(SupervisionStatus.BANNED);
-                    existing.setExpiresAt(null); // permanente
-                    banRepository.save(existing);
+        @Override
+        @Transactional
+        public UserBan banUser(BanUserCommand command) {
+                validateReportCount(command.getUserId());
+                banRepository.findActiveByUserId(command.getUserId()).ifPresent(existing -> {
+                        if (existing.getStatus() == SupervisionStatus.BANNED) {
+                                log.warn("[BAN] El usuario {} ya tiene un baneo permanente.", command.getUserId());
+                                throw new IllegalStateException("El usuario ya se encuentra baneado permanentemente.");
+                        }
+                        log.info("[BAN] Escalando sanción: Usuario {} pasará de SUSPENDED a BANNED",
+                                        command.getUserId());
                 });
+                banRepository.deleteByUserId(command.getUserId());
 
-        UserBan ban = UserBan.builder()
-                .userId(command.getUserId())
-                .username(command.getUsername())
-                .status(SupervisionStatus.BANNED)
-                .reason(command.getReason() + ": " + command.getDescription())
-                .adminId(command.getAdminId())
-                .createdAt(Instant.now())
-                .expiresAt(command.getExpiresAt()) // null = permanente
-                .notified(false)
-                .build();
+                String automaticUsername = fetchUsernameFromReports(command.getUserId());
 
-        UserBan saved = banRepository.save(ban);
-        notificationService.sendNotification(
-                command.getUserId(),
-                "BANNED",
-                "Tu cuenta ha sido bloqueada permanentemente. Motivo: " + command.getReason());
+                UserBan ban = UserBan.builder()
+                                .userId(command.getUserId())
+                                .username(automaticUsername)
+                                .status(SupervisionStatus.BANNED)
+                                .reason(command.getReason() + ": " + command.getDescription())
+                                .adminId(command.getAdminId())
+                                .createdAt(Instant.now())
+                                .expiresAt(null)
+                                .notified(true)
+                                .build();
 
-        // Publicar evento para que el módulo de auth bloquee el acceso
-        eventPublisher.publishUserBanned(UserBannedEvent.builder()
-                .userId(command.getUserId())
-                .status(SupervisionStatus.BANNED)
-                .reason(ban.getReason())
-                .expiresAt(command.getExpiresAt())
-                .build());
+                UserBan saved = banRepository.save(ban);
 
-        log.info("[BAN] Usuario {} baneado por admin {}", command.getUserId(), command.getAdminId());
-        return saved;
-    }
+                notificationService.sendNotification(
+                                command.getUserId(),
+                                "BANNED",
+                                "Tu cuenta ha sido bloqueada permanentemente. Motivo: " + command.getReason());
 
-    @Override
-    public UserBan suspendUser(SuspendUserCommand command) {
-        if (command.getExpiresAt() == null) {
-            throw new IllegalArgumentException("Suspensión requiere fecha de expiración");
+                eventPublisher.publishUserBanned(UserBannedEvent.builder()
+                                .userId(command.getUserId())
+                                .status(SupervisionStatus.BANNED)
+                                .reason(saved.getReason())
+                                .expiresAt(null)
+                                .build());
+
+                return saved;
         }
 
-        UserBan suspension = UserBan.builder()
-                .userId(command.getUserId())
-                .username(command.getUsername())
-                .status(SupervisionStatus.SUSPENDED)
-                .reason(command.getReason())
-                .adminId(command.getAdminId())
-                .createdAt(Instant.now())
-                .expiresAt(command.getExpiresAt())
-                .notified(false)
-                .build();
+        @Override
+        @Transactional
+        public UserBan suspendUser(SuspendUserCommand command) {
+                if (command.getExpiresAt() == null) {
+                        throw new IllegalArgumentException(
+                                        "La suspensión requiere una fecha de expiración obligatoria.");
+                }
 
-        UserBan saved = banRepository.save(suspension);
-        notificationService.sendNotification(
-                command.getUserId(),
-                "SUSPENDED",
-                "Tu cuenta ha sido suspendida temporalmente hasta el " + command.getExpiresAt() + ". Motivo: "
-                        + command.getReason());
+                validateReportCount(command.getUserId());
 
-        eventPublisher.publishUserSuspended(UserSuspendedEvent.builder()
-                .userId(command.getUserId())
-                .status(SupervisionStatus.SUSPENDED)
-                .reason(command.getReason())
-                .expiresAt(command.getExpiresAt())
-                .build());
+                banRepository.findActiveByUserId(command.getUserId()).ifPresent(existing -> {
+                        if (existing.getStatus() == SupervisionStatus.BANNED) {
+                                throw new IllegalStateException(
+                                                "No se puede suspender a un usuario que ya tiene un baneo permanente.");
+                        }
+                        log.info("[SUSPEND] Reemplazando sanción previa para el usuario {}", command.getUserId());
+                        banRepository.deleteByUserId(command.getUserId());
+                });
 
-        return saved;
-    }
+                String automaticUsername = fetchUsernameFromReports(command.getUserId());
 
-    @Override
-    public UserBan liftBan(String userId, String adminId) {
-        // 1. Buscamos si existe para poder publicar el evento antes de borrar
-        UserBan ban = banRepository.findMostRecentByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("No existe el usuario en la tabla de baneos"));
+                UserBan suspension = UserBan.builder()
+                                .userId(command.getUserId())
+                                .username(automaticUsername)
+                                .status(SupervisionStatus.SUSPENDED)
+                                .reason(command.getReason() + ": " + command.getDescription())
+                                .adminId(command.getAdminId())
+                                .createdAt(Instant.now())
+                                .expiresAt(command.getExpiresAt())
+                                .notified(true)
+                                .build();
 
-        // 2. Borramos físicamente de MongoDB
-        banRepository.deleteByUserId(userId);
-        notificationService.sendNotification(
-                userId,
-                "BAN_LIFTED",
-                "Tu cuenta ha sido habilitada nuevamente por un administrador.");
+                UserBan saved = banRepository.save(suspension);
 
-        // 3. Notificamos
-        eventPublisher.publishBanLifted(BanLiftedEvent.builder()
-                .userId(userId)
-                .adminId(adminId)
-                .build());
+                notificationService.sendNotification(
+                                command.getUserId(),
+                                "SUSPENDED",
+                                "Tu cuenta ha sido suspendida temporalmente hasta el " + command.getExpiresAt());
 
-        return ban;
-    }
+                eventPublisher.publishUserSuspended(UserSuspendedEvent.builder()
+                                .userId(command.getUserId())
+                                .status(SupervisionStatus.SUSPENDED)
+                                .reason(saved.getReason())
+                                .expiresAt(saved.getExpiresAt())
+                                .build());
+
+                return saved;
+        }
+
+        @Override
+        @Transactional
+        public UserBan liftBan(String userId, String adminId) {
+                UserBan ban = banRepository.findActiveByUserId(userId)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "No existe una sanción activa para este usuario: " + userId));
+
+                banRepository.deleteByUserId(userId);
+
+                notificationService.sendNotification(userId, "BAN_LIFTED", "Tu cuenta ha sido habilitada nuevamente.");
+
+                eventPublisher.publishBanLifted(BanLiftedEvent.builder()
+                                .userId(userId)
+                                .adminId(adminId)
+                                .build());
+
+                return ban;
+        }
+
+        /**
+         * Verifica que el usuario cuente con el volumen de reportes necesario para
+         * proceder.
+         */
+        private void validateReportCount(String userId) {
+                List<Report> reports = reportRepository.findByReportedUserId(userId);
+                int currentCount = reports.size();
+
+                if (currentCount < MIN_REPORTS_REQUIRED) {
+                        log.warn("[VALIDATION] Intento de sanción fallido: Usuario {} tiene {} reportes, se requieren {}",
+                                        userId, currentCount, MIN_REPORTS_REQUIRED);
+                        throw new IllegalStateException("Acción denegada: El usuario debe tener al menos "
+                                        + MIN_REPORTS_REQUIRED + " reportes para ser sancionado (Actual: "
+                                        + currentCount + ")");
+                }
+        }
+
+        private String fetchUsernameFromReports(String userId) {
+                return reportRepository.findByReportedUserId(userId)
+                                .stream()
+                                .findFirst()
+                                .map(Report::getReportedUsername)
+                                .orElse("Usuario_Desconocido");
+        }
 }

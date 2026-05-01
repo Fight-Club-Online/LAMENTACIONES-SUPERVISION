@@ -15,5 +15,5 @@ public class BanUserCommand {
     private String adminId;
     private BanReason reason;
     private String description;
-    private Instant expiresAt;   // null = ban permanente
+    private Instant expiresAt;   
 }

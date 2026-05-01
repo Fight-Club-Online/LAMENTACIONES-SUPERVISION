@@ -13,5 +13,6 @@ public class SuspendUserCommand {
     private String username;
     private String adminId;
     private String reason;
-    private Instant expiresAt;  // requerido para suspensión
+    private String description;
+    private Instant expiresAt;  
 }

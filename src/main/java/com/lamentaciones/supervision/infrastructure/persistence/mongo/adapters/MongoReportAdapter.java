@@ -35,7 +35,6 @@ public class MongoReportAdapter implements ReportRepository {
     @Override
     public List<Report> findByStatus(ReportStatus status, int skip, int limit) {
         int page = limit > 0 ? skip / limit : 0;
-        // Usamos el nuevo método con fallback para que encuentre reportes sin el campo
         return mongoRepo.findByReportStatusWithFallback(status.name(), PageRequest.of(page, limit))
                 .stream()
                 .map(this::toDomain)
@@ -67,7 +66,6 @@ public class MongoReportAdapter implements ReportRepository {
                 .reporterId(domain.getReporterId())
                 .reporterUsername(domain.getReporterUsername())
                 .reportedUsername(domain.getReportedUsername())
-                .type(domain.getType() != null ? domain.getType().name() : null)
                 .description(domain.getDescription())
                 .fightId(domain.getFightId())
                 .evidenceMessages(domain.getEvidenceMessages())
@@ -87,9 +85,6 @@ public class MongoReportAdapter implements ReportRepository {
                 .reporterId(doc.getReporterId())
                 .reporterUsername(doc.getReporterUsername())
                 .reportedUsername(doc.getReportedUsername())
-                .type(doc.getType() != null
-                        ? com.lamentaciones.supervision.domain.enums.ReportType.valueOf(doc.getType())
-                        : null)
                 .description(doc.getDescription())
                 .fightId(doc.getFightId())
                 .evidenceMessages(doc.getEvidenceMessages())

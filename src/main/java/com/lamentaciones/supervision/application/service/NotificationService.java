@@ -16,7 +16,6 @@ public class NotificationService implements GetUserNotificationsUseCase {
 
     private final MongoNotificationAdapter notificationAdapter;
 
-    // Método para ser usado internamente por BanService
     public void sendNotification(String userId, String type, String message) {
         SupervisionNotification notification = SupervisionNotification.builder()
                 .userId(userId)
@@ -40,7 +39,6 @@ public class NotificationService implements GetUserNotificationsUseCase {
 
     @Override
     public List<SupervisionNotification> getAllNotifications(String userId) {
-        // Llama al adaptador para traer todo el historial ordenado
         return notificationAdapter.findAllByUserId(userId);
     }
 }

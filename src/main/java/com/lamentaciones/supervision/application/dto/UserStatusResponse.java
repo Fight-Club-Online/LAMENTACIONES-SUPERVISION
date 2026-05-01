@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 public class UserStatusResponse {
     private String userId;
     private SupervisionStatus status;
-    private boolean canAccess;            // false si BANNED o SUSPENDED vigente
-    private String message;              // mensaje para mostrar al usuario
-    private Instant expiresAt;           // cuándo termina la suspensión
-    private long remainingSeconds;       // segundos restantes
+    private boolean canAccess;            
+    private String message;              
+    private Instant expiresAt;           
+    private long remainingSeconds;       
     private int warningCount;
     private boolean hasUnreadNotifications;
 }

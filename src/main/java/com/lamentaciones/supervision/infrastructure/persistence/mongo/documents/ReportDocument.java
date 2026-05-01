@@ -4,7 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field; // Importante
+import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.Instant;
 import java.util.List;
 
@@ -15,16 +15,16 @@ public class ReportDocument {
     private String id;
 
     @Indexed
-    @Field("targetId") // En tu imagen de Atlas es 'targetId'
+    @Field("targetId") 
     private String reportedUserId;
 
-    @Field("emisorId") // En tu imagen de Atlas es 'emisorId'
+    @Field("emisorId") 
     private String reporterId;
 
-    @Field("motivo") // En tu imagen de Atlas es 'motivo'
+    @Field("motivo") 
     private String description;
 
-    @Field("fecha") // En tu imagen de Atlas es 'fecha'
+    @Field("fecha") 
     private Instant createdAt;
 
     @Indexed
@@ -32,7 +32,6 @@ public class ReportDocument {
 
     private String reporterUsername;
     private String reportedUsername;
-    private String type;
     private List<String> evidenceMessages;
     private String reportStatus;
     private String adminNotes;

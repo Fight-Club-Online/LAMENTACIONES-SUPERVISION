@@ -8,7 +8,7 @@ import java.time.Instant;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class UserSuspendedEvent {
     private String userId;
-    private SupervisionStatus status; // SUSPENDED
+    private SupervisionStatus status;
     private String reason;
     private Instant expiresAt;
 }

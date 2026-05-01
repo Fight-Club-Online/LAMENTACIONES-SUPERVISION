@@ -26,14 +26,10 @@ public class SupervisionPublicController {
     private final CheckUserStatusUseCase checkUserStatusUseCase;
     private final GetChatHistoryUseCase getChatHistoryUseCase;
     private final GetUserNotificationsUseCase getNotificationsUseCase;
-
-    // Verificar estado del usuario (llamado principalmente en el flujo de login)
     @GetMapping("/status/{userId}")
     public ResponseEntity<UserStatusResponse> checkStatus(@PathVariable String userId) {
         return ResponseEntity.ok(checkUserStatusUseCase.checkStatus(userId));
     }
-
-    // Consulta del historial de chat de una pelea específica
     @GetMapping("/chat/{fightId}")
     public ResponseEntity<List<ChatMessage>> getChatHistory(
             @PathVariable String fightId,
@@ -41,15 +37,12 @@ public class SupervisionPublicController {
         return ResponseEntity.ok(getChatHistoryUseCase.getChatHistory(fightId, limit));
     }
 
-    // Obtener notificaciones de acciones de supervisión (baneos, advertencias,
-    // etc.)
     @GetMapping("/notifications/{userId}")
     public ResponseEntity<List<SupervisionNotification>> getNotifications(
             @PathVariable String userId) {
         return ResponseEntity.ok(getNotificationsUseCase.getUnreadNotifications(userId));
     }
 
-    // Marcar las notificaciones del usuario como leídas
     @PatchMapping("/notifications/{userId}/read")
     public ResponseEntity<Void> markNotificationsRead(@PathVariable String userId) {
         getNotificationsUseCase.markAsRead(userId);
@@ -62,7 +55,6 @@ public class SupervisionPublicController {
         return ResponseEntity.ok(getNotificationsUseCase.getUnreadNotifications(userId));
     }
 
-    // NUEVO: Consulta del historial completo de notificaciones
     @GetMapping("/notifications/{userId}/history")
     public ResponseEntity<List<SupervisionNotification>> getNotificationHistory(
             @PathVariable String userId) {

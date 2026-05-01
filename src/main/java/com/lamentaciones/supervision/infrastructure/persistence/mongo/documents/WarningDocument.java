@@ -7,20 +7,23 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.Instant;
 
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
-@Document(collection = "WARNINGS") // Apunta a la colección de censura
+@Document(collection = "WARNINGS") 
 public class WarningDocument {
     @Id
     private String id;
 
-    private String fightId; // Puede ser null según tu imagen
+    private String fightId;
     private String userId;
     private String username;
 
-    @Field("texto") // Mapea el mensaje censurado "****"
+    @Field("texto") 
     private String content;
+
+    private Integer count;
+
+    private String source;
 
     @Field("timestamp")
     private Instant timestamp;
 
-    private Integer count; // Campo único de esta colección
 }

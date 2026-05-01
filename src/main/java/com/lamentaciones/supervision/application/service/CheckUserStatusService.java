@@ -34,7 +34,6 @@ public class CheckUserStatusService implements CheckUserStatusUseCase {
 
         UserBan ban = activeBan.get();
 
-        // Si es BANNED permanente
         if (ban.getStatus() == SupervisionStatus.BANNED && ban.getExpiresAt() == null) {
             return UserStatusResponse.builder()
                 .userId(userId)
@@ -45,7 +44,6 @@ public class CheckUserStatusService implements CheckUserStatusUseCase {
                 .build();
         }
 
-        // Si está suspendido y no ha expirado
         if (ban.getExpiresAt() != null && Instant.now().isBefore(ban.getExpiresAt())) {
             long remaining = ban.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond();
             return UserStatusResponse.builder()
@@ -59,7 +57,6 @@ public class CheckUserStatusService implements CheckUserStatusUseCase {
                 .build();
         }
 
-        // Expiró la suspensión, puede acceder
         return UserStatusResponse.builder()
             .userId(userId)
             .status(SupervisionStatus.ACTIVE)

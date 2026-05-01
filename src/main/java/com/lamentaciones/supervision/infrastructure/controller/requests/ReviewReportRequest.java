@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewReportRequest {
-    private ReportStatus action; // RESOLVED o DISMISSED
+    private ReportStatus action; 
     private String notes;
 }

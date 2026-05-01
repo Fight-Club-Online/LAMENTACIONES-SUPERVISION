@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/admin/supervision")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')") // Solo admins
+@PreAuthorize("hasRole('ADMIN')") 
 public class SupervisionAdminController {
 
     private final BanUserUseCase banUserUseCase;
@@ -49,8 +49,6 @@ public class SupervisionAdminController {
     private final GetChatHistoryUseCase getChatHistoryUseCase;
     private final GetUserNotificationsUseCase getNotificationsUseCase;
 
-    // ── BAN / SUSPEND ─────────────────────────────────────────────
-
     @PostMapping("/ban/{userId}")
     public ResponseEntity<UserBan> banUser(
             @PathVariable String userId,
@@ -58,11 +56,10 @@ public class SupervisionAdminController {
         return ResponseEntity.ok(banUserUseCase.banUser(
                 BanUserCommand.builder()
                         .userId(userId)
-                        .username(request.getUsername())
                         .adminId(request.getAdminId())
                         .reason(BanReason.valueOf(request.getReason().toUpperCase()))
                         .description(request.getDescription())
-                        .expiresAt(request.getExpiresAt()) // null = permanente
+                        .expiresAt(request.getExpiresAt()) 
                         .build()));
     }
 
@@ -73,9 +70,9 @@ public class SupervisionAdminController {
         return ResponseEntity.ok(suspendUserUseCase.suspendUser(
                 SuspendUserCommand.builder()
                         .userId(userId)
-                        .username(request.getUsername())
                         .adminId(request.getAdminId())
                         .reason(request.getReason())
+                        .description(request.getDescription())
                         .expiresAt(request.getExpiresAt())
                         .build()));
     }
@@ -85,9 +82,8 @@ public class SupervisionAdminController {
             @PathVariable String userId,
             @RequestParam String adminId) {
         liftBanUseCase.liftBan(userId, adminId);
-        return ResponseEntity.noContent().build(); // Devuelve 204 No Content (Éxito)
+        return ResponseEntity.noContent().build(); 
     }
-    // ── REPORTS ───────────────────────────────────────────────────
 
     @GetMapping("/reports/pending")
     public ResponseEntity<List<Report>> getPendingReports(
@@ -95,7 +91,6 @@ public class SupervisionAdminController {
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(reviewReportUseCase.getPendingReports(page, size));
     }
-    // ── NUEVO ENDPOINT: HISTORIAL GLOBAL ──────────────────────────────
 
     @GetMapping("/reports/history")
     public ResponseEntity<List<Report>> getAllReportsHistory(
@@ -122,14 +117,10 @@ public class SupervisionAdminController {
                         .build()));
     }
 
-    // ── STATUS ────────────────────────────────────────────────────
-
     @GetMapping("/status/{userId}")
     public ResponseEntity<UserStatusResponse> getUserStatus(@PathVariable String userId) {
         return ResponseEntity.ok(checkUserStatusUseCase.checkStatus(userId));
     }
-
-    // ── CHAT HISTORY ──────────────────────────────────────────────
 
     @GetMapping("/chat/{fightId}")
     public ResponseEntity<List<ChatMessage>> getChatHistory(

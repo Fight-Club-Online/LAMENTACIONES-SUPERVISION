@@ -16,6 +16,6 @@ import lombok.Setter;
 @Getter @Setter
 public class ReviewReportCommand {
     private String reportId;
-    private ReportStatus action; // RESOLVED o DISMISSED
+    private ReportStatus action; 
     private String notes;
 }

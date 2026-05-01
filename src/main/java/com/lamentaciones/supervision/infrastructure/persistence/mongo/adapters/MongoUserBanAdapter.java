@@ -29,7 +29,7 @@ public class MongoUserBanAdapter implements UserBanRepository {
 
     @Override
     public Optional<UserBan> findActiveByUserId(String userId) {
-        return mongoRepo.findByUserIdAndStatus(userId, "ACTIVE")
+        return mongoRepo.findTopByUserIdOrderByCreatedAtDesc(userId)
                 .map(this::toDomain);
     }
 
@@ -49,7 +49,6 @@ public class MongoUserBanAdapter implements UserBanRepository {
 
     @Override
     public void deleteByUserId(String userId) {
-        // Borrado directo y atómico en MongoDB usando el campo userId
         if (userId != null) {
             mongoRepo.deleteByUserId(userId);
         }
@@ -83,7 +82,6 @@ public class MongoUserBanAdapter implements UserBanRepository {
                 .id(doc.getId())
                 .userId(doc.getUserId())
                 .username(doc.getUsername())
-                // Usa el Enum correcto: SupervisionStatus
                 .status(doc.getStatus() != null ? SupervisionStatus.valueOf(doc.getStatus().toUpperCase()) : null)
                 .reason(doc.getReason())
                 .adminId(doc.getAdminId())

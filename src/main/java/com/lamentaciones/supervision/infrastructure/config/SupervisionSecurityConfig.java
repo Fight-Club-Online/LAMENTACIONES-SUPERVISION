@@ -22,24 +22,17 @@ public class SupervisionSecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
-            // IMPORTANTE: Eliminamos la política STATELESS para que la sesión básica funcione en el navegador
             .authorizeHttpRequests(auth -> auth
-                // Documentación libre
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**").permitAll()
-                
-                // Endpoints públicos
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**").permitAll()                
                 .requestMatchers(HttpMethod.GET,  "/api/v1/supervision/status/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/supervision/report").permitAll()
                 .requestMatchers(HttpMethod.GET,  "/api/v1/supervision/chat/**").permitAll()
                 .requestMatchers(HttpMethod.GET,  "/api/v1/supervision/notifications/**").permitAll()
                 .requestMatchers(HttpMethod.PATCH,"/api/v1/supervision/notifications/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-
-                // Todo lo que sea ADMIN requerirá el password de Docker
                 .requestMatchers("/api/v1/admin/**").authenticated()
                 .anyRequest().authenticated()
             )
-            // ESTA ES LA CLAVE: Activa el diálogo de usuario/password en el navegador y Swagger
             .httpBasic(Customizer.withDefaults());
             
         return http.build();

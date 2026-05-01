@@ -5,6 +5,6 @@ import java.util.List;
 
 public interface GetUserNotificationsUseCase {
     List<SupervisionNotification> getUnreadNotifications(String userId);
-    List<SupervisionNotification> getAllNotifications(String userId); // <--- Nuevo
+    List<SupervisionNotification> getAllNotifications(String userId); 
     void markAsRead(String userId);
 }

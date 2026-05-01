@@ -31,7 +31,6 @@ public class MongoChatMessageAdapter implements ChatMessageRepository {
 
     @Override
     public List<ChatMessage> findByFightIdOrderByTimestamp(String fightId, int limit) {
-        // Consulta estándar a la colección MESSAGES
         return mongoRepo.findByFightIdOrderByTimestampAsc(fightId, PageRequest.of(0, limit))
                 .stream()
                 .map(this::toDomain)
@@ -40,11 +39,9 @@ public class MongoChatMessageAdapter implements ChatMessageRepository {
 
     @Override
     public List<ChatMessage> findFlagged(int skip, int limit) {
-        // Corrección: Cálculo de página y uso de paginación real para la colección WARNINGS
         int page = limit > 0 ? skip / limit : 0;
         PageRequest pageable = PageRequest.of(page, limit);
         
-        // Ahora pasamos 'pageable' para que la consulta en Atlas sea eficiente
         return warningRepo.findAllByOrderByTimestampDesc(pageable) 
                 .stream()
                 .map(this::warningToDomain)
@@ -63,14 +60,17 @@ public class MongoChatMessageAdapter implements ChatMessageRepository {
         if (doc == null) return null;
         return ChatMessage.builder()
                 .id(doc.getId())
-                .fightId(doc.getFightId()) // En WARNINGS puede ser null
+                .fightId(doc.getFightId()) 
                 .userId(doc.getUserId())
                 .username(doc.getUsername())
-                .content(doc.getContent())   // Mapea el campo 'texto' de la base de datos
+                .content(doc.getContent())  
+                .source(doc.getSource())   
+                .count(doc.getCount())
                 .timestamp(doc.getTimestamp())
-                .filtered(true)              // Si está en esta colección, fue censurado
-                .flagged(true)               // Marcamos como flagged para la vista del administrador
+                .filtered(true)  
+                .flagged(true)    
                 .build();
+
     }
 
     private ChatMessageDocument toDocument(ChatMessage domain) {
@@ -81,6 +81,7 @@ public class MongoChatMessageAdapter implements ChatMessageRepository {
                 .userId(domain.getUserId())
                 .username(domain.getUsername())
                 .content(domain.getContent())
+                .source(domain.getSource()) 
                 .timestamp(domain.getTimestamp())
                 .filtered(domain.isFiltered())
                 .flagged(domain.isFlagged())
@@ -94,7 +95,9 @@ public class MongoChatMessageAdapter implements ChatMessageRepository {
                 .fightId(doc.getFightId())
                 .userId(doc.getUserId())
                 .username(doc.getUsername())
-                .content(doc.getContent())   
+                .content(doc.getContent())  
+                .source(doc.getSource())   
+                .count(null)
                 .timestamp(doc.getTimestamp()) 
                 .filtered(doc.isFiltered())
                 .flagged(doc.isFlagged())

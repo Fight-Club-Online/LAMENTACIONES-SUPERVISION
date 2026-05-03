@@ -16,6 +16,7 @@ public class UserBanDocument {
     private String username;
     private String status;
     private String reason;
+    private String description;
     private String adminId;
     private Instant createdAt;
     private Instant expiresAt;

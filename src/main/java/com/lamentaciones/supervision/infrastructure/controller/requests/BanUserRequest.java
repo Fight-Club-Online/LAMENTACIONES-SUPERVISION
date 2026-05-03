@@ -8,5 +8,4 @@ public class BanUserRequest {
     private String adminId;
     private String reason;
     private String description;
-    private Instant expiresAt;
 }

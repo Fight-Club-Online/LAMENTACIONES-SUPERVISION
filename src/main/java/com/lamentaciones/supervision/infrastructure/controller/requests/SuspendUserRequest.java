@@ -7,7 +7,7 @@ import java.time.Instant;
 @Builder 
 @NoArgsConstructor 
 @AllArgsConstructor
-@Getter @Setter // Añade estos dos para forzar la generación
+@Getter @Setter
 public class SuspendUserRequest {
     private String adminId;
     private String reason;

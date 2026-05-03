@@ -59,7 +59,6 @@ public class SupervisionAdminController {
                         .adminId(request.getAdminId())
                         .reason(BanReason.valueOf(request.getReason().toUpperCase()))
                         .description(request.getDescription())
-                        .expiresAt(request.getExpiresAt()) 
                         .build()));
     }
 

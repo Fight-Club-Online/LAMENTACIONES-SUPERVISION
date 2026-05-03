@@ -13,11 +13,12 @@ public class UserBan {
     private String id;
     private String userId;
     private String username;
-    private SupervisionStatus status;     // BANNED | SUSPENDED | ACTIVE | WARNING
+    private SupervisionStatus status;    
     private String reason;
+    private String description;
     private String adminId;
     private Instant createdAt;
-    private Instant expiresAt;            // null = permanente (BANNED)
+    private Instant expiresAt;            
     private boolean notified;
     private int warningCount;
 }

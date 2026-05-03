@@ -15,5 +15,4 @@ public class BanUserCommand {
     private String adminId;
     private BanReason reason;
     private String description;
-    private Instant expiresAt;   
 }

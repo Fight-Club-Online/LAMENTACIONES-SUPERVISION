@@ -58,7 +58,8 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                                 .userId(command.getUserId())
                                 .username(automaticUsername)
                                 .status(SupervisionStatus.BANNED)
-                                .reason(command.getReason() + ": " + command.getDescription())
+                                .reason(command.getReason().name()) // Solo el Enum (ej: "OTHER")
+                                .description(command.getDescription()) // La descripción aparte
                                 .adminId(command.getAdminId())
                                 .createdAt(Instant.now())
                                 .expiresAt(null)
@@ -110,7 +111,8 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                                 .userId(command.getUserId())
                                 .username(automaticUsername)
                                 .status(SupervisionStatus.SUSPENDED)
-                                .reason(command.getReason() + ": " + command.getDescription())
+                                .reason(command.getReason().name()) // Solo el Enum (ej: "OTHER")
+                                .description(command.getDescription()) // La descripción aparte
                                 .adminId(command.getAdminId())
                                 .createdAt(Instant.now())
                                 .expiresAt(command.getExpiresAt())

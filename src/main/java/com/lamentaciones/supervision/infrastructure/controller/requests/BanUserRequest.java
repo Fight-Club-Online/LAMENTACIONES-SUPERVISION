@@ -1,7 +1,6 @@
 package com.lamentaciones.supervision.infrastructure.controller.requests;
 
 import lombok.Data;
-import java.time.Instant;
 
 @Data
 public class BanUserRequest {

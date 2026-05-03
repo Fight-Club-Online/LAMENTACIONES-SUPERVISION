@@ -1,6 +1,5 @@
 package com.lamentaciones.supervision.application.commands;
 
-import java.time.Instant;
 
 import com.lamentaciones.supervision.domain.enums.BanReason;
 import lombok.AllArgsConstructor;

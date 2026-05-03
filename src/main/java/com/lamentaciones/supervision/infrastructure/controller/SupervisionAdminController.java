@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/admin/supervision")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')") 
+@PreAuthorize("hasRole('ADMIN')")
 public class SupervisionAdminController {
 
     private final BanUserUseCase banUserUseCase;
@@ -50,30 +50,32 @@ public class SupervisionAdminController {
     private final GetUserNotificationsUseCase getNotificationsUseCase;
 
     @PostMapping("/ban/{userId}")
-    public ResponseEntity<UserBan> banUser(
+    public ResponseEntity<Void> banUser(
             @PathVariable String userId,
             @RequestBody BanUserRequest request) {
-        return ResponseEntity.ok(banUserUseCase.banUser(
+        banUserUseCase.banUser(
                 BanUserCommand.builder()
                         .userId(userId)
                         .adminId(request.getAdminId())
                         .reason(BanReason.valueOf(request.getReason().toUpperCase()))
                         .description(request.getDescription())
-                        .build()));
+                        .build());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/suspend/{userId}")
-    public ResponseEntity<UserBan> suspendUser(
+    public ResponseEntity<Void> suspendUser(
             @PathVariable String userId,
             @RequestBody SuspendUserRequest request) {
-        return ResponseEntity.ok(suspendUserUseCase.suspendUser(
+        suspendUserUseCase.suspendUser(
                 SuspendUserCommand.builder()
                         .userId(userId)
                         .adminId(request.getAdminId())
                         .reason(BanReason.valueOf(request.getReason().toUpperCase()))
                         .description(request.getDescription())
                         .expiresAt(request.getExpiresAt())
-                        .build()));
+                        .build());
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/ban/{userId}")
@@ -81,7 +83,7 @@ public class SupervisionAdminController {
             @PathVariable String userId,
             @RequestParam String adminId) {
         liftBanUseCase.liftBan(userId, adminId);
-        return ResponseEntity.noContent().build(); 
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/reports/pending")

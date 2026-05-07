@@ -6,7 +6,10 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 
-@Data @Builder @NoArgsConstructor @AllArgsConstructor
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "BANS")
 public class UserBanDocument {
     @Id
@@ -19,6 +22,7 @@ public class UserBanDocument {
     private String description;
     private String adminId;
     private Instant createdAt;
+    @Indexed(expireAfter = "0s")
     private Instant expiresAt;
     private boolean notified;
     private int warningCount;

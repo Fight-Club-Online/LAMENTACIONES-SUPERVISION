@@ -22,7 +22,7 @@ public class UserBanDocument {
     private String description;
     private String adminId;
     private Instant createdAt;
-    @Indexed(expireAfter = "0s")
+    @Indexed
     private Instant expiresAt;
     private boolean notified;
     private int warningCount;

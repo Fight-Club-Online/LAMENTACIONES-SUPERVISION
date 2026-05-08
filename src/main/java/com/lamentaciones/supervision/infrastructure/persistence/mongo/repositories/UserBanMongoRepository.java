@@ -1,5 +1,6 @@
 package com.lamentaciones.supervision.infrastructure.persistence.mongo.repositories;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,6 @@ public interface UserBanMongoRepository extends MongoRepository<UserBanDocument,
     Optional<UserBanDocument> findByUserIdAndStatus(String userId, String status);
     @Transactional
     void deleteByUserId(String userId);
+    List<UserBanDocument> findByStatusAndExpiresAtBefore(String status, Instant now);
+    
 }

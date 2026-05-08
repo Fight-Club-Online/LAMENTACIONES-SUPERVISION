@@ -41,4 +41,6 @@ public class NotificationService implements GetUserNotificationsUseCase {
     public List<SupervisionNotification> getAllNotifications(String userId) {
         return notificationAdapter.findAllByUserId(userId);
     }
+
+
 }

@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: supervision-app
+    container_name: supervision-service
     ports:
       - "8085:8085"
     environment:
@@ -38,7 +38,24 @@ services:
       retries: 5
     networks:
       - lamentaciones-network
-
+  prometheus:
+      image: prom/prometheus:latest
+      container_name: prometheus-server
+      volumes:
+        - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      ports:
+         - "9090:9090"
+      networks:
+        - lamentaciones-network
+  grafana:
+      image: grafana/grafana:latest
+      container_name: grafana-dashboard
+      ports:
+        - "3000:3000"
+      environment:
+        - GF_SECURITY_ADMIN_PASSWORD=admin 
+      networks:
+        - lamentaciones-network
 networks:
   lamentaciones-network:
     driver: bridge

@@ -6,7 +6,15 @@ Apagar docker-compose down
 Actualizar código docker-compose up --build
 Limpiar todo (borra volúmenes) docker-compose down -v
 
-http://localhost:8085/swagger-ui/index.html#/ o http://localhost:57286/swagger-ui/index.html
+http://localhost:8085/swagger-ui/index.html#/ 
+
+http://localhost:8085/actuator
+
+http://localhost:8085/actuator/prometheus
+
+grafana 
+
+http://localhost:3000
 
 https://supervision-lamentaciones-d8d3a5bpd6gvcva8.canadacentral-01.azurewebsites.net/swagger-ui/index.html#/
 

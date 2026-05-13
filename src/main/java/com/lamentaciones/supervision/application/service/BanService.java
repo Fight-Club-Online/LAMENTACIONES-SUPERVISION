@@ -24,6 +24,7 @@ import com.lamentaciones.supervision.domain.repository.ReportRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import io.micrometer.core.instrument.MeterRegistry;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
         private final WarningMongoRepository warningRepo;
         private final SupervisionEventPublisher eventPublisher;
         private final NotificationService notificationService;
+        private final MeterRegistry meterRegistry;
         private static final int MIN_REPORTS_REQUIRED = 3;
 
         @Override
@@ -68,6 +70,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                                 .build();
 
                 UserBan saved = banRepository.save(ban);
+                meterRegistry.counter("business.supervision.actions", "type", "permanent_ban").increment();
 
                 notificationService.sendNotification(
                                 command.getUserId(),
@@ -121,7 +124,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                                 .build();
 
                 UserBan saved = banRepository.save(suspension);
-
+                meterRegistry.counter("business.supervision.actions", "type", "temporary_ban").increment();
                 notificationService.sendNotification(
                                 command.getUserId(),
                                 "SUSPENDED",
@@ -145,7 +148,7 @@ public class BanService implements BanUserUseCase, SuspendUserUseCase, LiftBanUs
                                                 "No existe una sanción activa para este usuario: " + userId));
 
                 banRepository.deleteByUserId(userId);
-
+                meterRegistry.counter("business.supervision.actions", "type", "lift_ban").increment();
                 notificationService.sendNotification(userId, "BAN_LIFTED", "Tu cuenta ha sido habilitada nuevamente.");
 
                 eventPublisher.publishBanLifted(BanLiftedEvent.builder()

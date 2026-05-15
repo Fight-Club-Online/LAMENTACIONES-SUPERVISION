@@ -47,15 +47,6 @@ services:
          - "9090:9090"
       networks:
         - lamentaciones-network
-  grafana:
-      image: grafana/grafana:latest
-      container_name: grafana-dashboard
-      ports:
-        - "3000:3000"
-      environment:
-        - GF_SECURITY_ADMIN_PASSWORD=admin 
-      networks:
-        - lamentaciones-network
 networks:
   lamentaciones-network:
     driver: bridge

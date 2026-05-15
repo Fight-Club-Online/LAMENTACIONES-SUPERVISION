@@ -17,6 +17,8 @@ services:
       - FRONTEND_ORIGINS=${FRONTEND_ORIGIN}
       - NODE_ENV=${NODE_ENV}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - SPRING_SECURITY_USER_NAME=admin
+      - SPRING_SECURITY_USER_PASSWORD=lamentaciones2026
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -45,6 +47,9 @@ services:
         - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       ports:
          - "9090:9090"
+      depends_on: 
+        supervision-service:
+          condition: service_healthy
       networks:
         - lamentaciones-network
 networks:

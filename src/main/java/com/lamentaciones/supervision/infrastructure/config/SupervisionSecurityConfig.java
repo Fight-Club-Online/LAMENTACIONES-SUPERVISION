@@ -31,7 +31,6 @@ public class SupervisionSecurityConfig {
                 .requestMatchers(HttpMethod.PATCH,"/api/v1/supervision/notifications/**").permitAll()
                 .requestMatchers("/actuator/**").authenticated()
                 .requestMatchers("/api/v1/admin/**").authenticated()
-                .requestMatchers("/api/v1/admin/**").authenticated()
                 .anyRequest().authenticated()
             )
             .httpBasic(Customizer.withDefaults());

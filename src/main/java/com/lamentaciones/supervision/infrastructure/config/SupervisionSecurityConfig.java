@@ -29,6 +29,7 @@ public class SupervisionSecurityConfig {
                 .requestMatchers(HttpMethod.GET,  "/api/v1/supervision/chat/**").permitAll()
                 .requestMatchers(HttpMethod.GET,  "/api/v1/supervision/notifications/**").permitAll()
                 .requestMatchers(HttpMethod.PATCH,"/api/v1/supervision/notifications/**").permitAll()
+                .requestMatchers("/actuator/**").authenticated()
                 .requestMatchers("/api/v1/admin/**").authenticated()
                 .requestMatchers("/api/v1/admin/**").authenticated()
                 .anyRequest().authenticated()

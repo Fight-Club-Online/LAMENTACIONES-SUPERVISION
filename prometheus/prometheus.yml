@@ -9,10 +9,6 @@ scrape_configs:
 
     scheme: https
 
-    basic_auth:
-      username: 'admin'
-      password: 'lamentaciones2026'
-
     static_configs:
       - targets:
           - 'supervision-lamentaciones-d8d3a5bpd6gvcva8.canadacentral-01.azurewebsites.net'
